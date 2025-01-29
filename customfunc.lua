@@ -25,6 +25,11 @@ function GetSelfToTargetPitch( context )
 	return Pitch; --Pitchを取得した
 end
 
+--ターゲットの未来位置を取得する
+function GetPredictTargetPosition( context, prevYaw, Yaw, PREV_distxz, distxz )
+	
+end
+
 --自分の下の地面自体の絶対高度を取得する
 function GetGroundAltitude( context )
 	local Alt_E = GetEntityAltitude( context, 0); --プレイヤーの絶対高度を取得する
@@ -51,12 +56,13 @@ end
 
 --予測QTを利用可能にする(QT反応角が0の場合に有効) QT旋回中は発動しない minYaw~maxYaw内でQT発動
 function SetEnablePredictQT( context, prevYaw, nowYaw, minYaw, maxYaw ) --Yaw*2<<実際のQT旋回角が理想。LAHIRE脚の場合は30°以内が良い
-	local Yaw_var = nowYaw - prevYaw;
-	if (Yaw_var > 1 or Yaw_var < -1) then --Yaw変化量が大きい場合はQTしない 変な動きをするならここを弄る
+	if (QT_counter < 30) then
 		SetEnableTurnToTarget( context, false );
+		QT_counter = QT_counter + 1;
 		return 1; --QTを利用しなかった
-	elseif (nowYaw <= maxYaw and nowYaw >= minYaw) then
+	elseif (nowYaw <= maxYaw and nowYaw >= minYaw and QT_counter >= 30) then
 		SetEnableTurnToTarget( context, true );
+		QT_counter = 0;
 		if (nowYaw <= 0) then
 			return 2; --左向きQTを利用した(右側扱い)
 		else
